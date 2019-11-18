@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <title>Robert Moog's 86th Birthday</title>
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+    <style>
+      body{
+        margin:0;
+        padding:0;
+        background:white;
+      }
+      video{
+        opacity:0;
+        pointer-events:none;
+      }
+      canvas,.canvasContainer{
+        display: block;
+        position:absolute;
+        max-width:600px;
+        width:calc(100vw - 16px);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .canvasContainer{
+        max-width:600px;
+        max-height:340px;
+        width:calc(100vw - 16px);
+        height:calc((100vw - 16px)*340/600);
+        border-radius:8px;
+        overflow:hidden;
+      }
+    </style>
+    <script src="https://unpkg.com/ml5@0.4.2/dist/ml5.min.js"></script>
+    <script src="./pixi.min.js"></script>
+    <script src="./pixi-layers.js"></script>
+    <script src="./pixi-lights.js"></script>
+    <script src="./audio.js" defer></script>
+    <script src="./poseNet.js" defer></script>
+    <script src="./video.js" defer></script>
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <div class="canvasContainer">
+      <canvas width="600" height="340" style="touch-action: none; cursor: inherit;"></canvas>
+    </div>
+     <video autoplay muted playsinline width="600" height="340"></video>
+  </body>
+</html>
