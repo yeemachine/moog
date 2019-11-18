@@ -41,11 +41,11 @@ function modelLoaded() {
       let formatedNote = generateNote(rightHand.x,rightHand.y)
       displayText.text = formatedNote.scale + '|' + formatedNote.level
       displayText.position.set(308-displayText.width/2,249)
+      mouseOver = true
       changeFrequency(formatedNote.scaleNum,formatedNote.level)
     }
 
   }else{
-
   }
 });
 }
