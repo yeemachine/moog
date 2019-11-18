@@ -21,13 +21,12 @@ var calculateGain = function (mouseYPosition) {
 
 var createOscillator = function (e) {
     oscillator = context.createOscillator();
-    oscillator.frequency.setTargetAtTime(calculateFrequency(40), context.currentTime, 0.001);
+    oscillator.frequency.setTargetAtTime(calculateFrequency(0), context.currentTime, 0.001);
     gainNode.gain.setTargetAtTime(calculateGain(0), context.currentTime, 0.001);
     oscillator.connect(gainNode);
     oscillator.start(context.currentTime);
 };
 
-createOscillator()
 
 // var stopOscillator = function () {
 //     mousedown = false;
