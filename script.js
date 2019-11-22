@@ -2,7 +2,8 @@
             document.querySelector('.canvasContainer').appendChild(app.view);
 
             var stage = app.stage = new PIXI.display.Stage();
-            var light = new PIXI.lights.PointLight(0xffbf00, 1.5);
+            var lightR = new PIXI.lights.PointLight(0xffbf00, 3);
+            var lightL = new PIXI.lights.PointLight(0xffbf00, 3);
             let displayText
 
             // put all layers for deferred rendering of normals
@@ -36,13 +37,13 @@
                 block.scale = new PIXI.Point(scale,scale)
                 bg.position.set(0,0)
                 block.position.set(0,-6);
-                light.position.set(0, 0);
+                lightR.position.set(0, 0);
                 stage.addChild(bg);
                 stage.addChild(block);
 
                 stage.addChild(new PIXI.lights.AmbientLight(null, 1));
                 stage.addChild(new PIXI.lights.DirectionalLight(null, 1, block));
-                stage.addChild(light);
+                stage.addChild(lightR,lightL);
 
                 bg.interactive = true;
                 bg.on('mouseover',()=>{
@@ -53,7 +54,8 @@
                   gainNode.gain.setTargetAtTime(calculateGain(0), context.currentTime, 0.001);
                 })
                 bg.on('pointermove', function (event) {
-                    light.position.copy(event.data.global);
+                    lightR.position.copy(event.data.global);
+                    lightL.position.copy(event.data.global);
                     let formatedNote = generateNote(event.data.global.x,event.data.global.y)
                     displayText.text = formatedNote.scale + '|' + formatedNote.level
                     displayText.position.set(308-displayText.width/2,249)
@@ -75,14 +77,7 @@
                   displayText = new PIXI.Text('G|0',{fontFamily : 'IBM Plex Mono', fontSize: 22,fill : 0xe68a00, align : 'center'});
                   displayText.position.set(308-displayText.width/2,249)
                   stage.addChild(displayText);
-                  console.log(displayText)
-                  let scale=["G","F#","E","D","C","B","A","G"]
-                  // scale.forEach((e,i)=>{
-                  //   let txt = new PIXI.Text(e,{fontFamily : 'IBM Plex Mono', fontSize: 22,fill : 0xe68a00, align : 'center'});
-                  //   txt.position.set(440-i*45,130)
-                  //   txt.opacity = 0.2
-                  //   stage.addChild(txt);
-                  // })
+                  // console.log(displayText)
                 })
                 
               

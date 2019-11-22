@@ -6,8 +6,8 @@ var context = new AudioContext(),
 gainNode.connect(context.destination);
 
 var calculateFrequency = function (mouseXPosition) {
-    var minFrequency = 20,
-        maxFrequency = 1000;
+    var minFrequency = 30,
+        maxFrequency = 1500;
 
     return ((mouseXPosition / 600) * maxFrequency) + minFrequency;
 };
@@ -26,16 +26,6 @@ var createOscillator = function (e) {
     oscillator.connect(gainNode);
     oscillator.start(context.currentTime);
 };
-
-
-// var stopOscillator = function () {
-//     mousedown = false;
-
-//     if (oscillator) {
-//         oscillator.stop(context.currentTime);
-//         oscillator.disconnect();
-//     }
-// };
 
 var changeFrequency = function (x,y) {
 

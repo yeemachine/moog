@@ -14,8 +14,10 @@ const options = {
 
 // Create a new poseNet method
 
-let poseNet
-let rightHand = {}
+let poseNet,
+    rightHand = {x:0,y:0}, leftHand = {x:0,y:0},
+    currentPitch, currentGain
+
 const poseNetINIT = ()=> {
   poseNet = ml5.poseNet(video,options, modelLoaded);
 }
@@ -23,27 +25,49 @@ const poseNetINIT = ()=> {
 function modelLoaded() {
   console.log("Model Loaded!");
   poseNet.on("pose", function(results) {
-  if(results.length>0){
+  
+  //Only Detect 1 person  
+  if(results.length > 0){
     // flock.toPoint = true
     let scaledPoints = []
     let skeletonPoints = []
-    
-  
+    let rightWrist = results[0].pose.rightWrist
+    let leftWrist = results[0].pose.leftWrist
     // console.log(rightHand)
     
-    if(results[0].pose.rightWrist.confidence > 0.35){
+    if(rightWrist.confidence > 0.2 || leftWrist > 0.2){
+      let x = (rightWrist.y < leftWrist.y) ? rightWrist.x : leftWrist.x
+      let y = (rightWrist.y < leftWrist.y) ? rightWrist.y : leftWrist.y
+      
       rightHand = {
-        x:scale(results[0].pose.rightWrist.x,video.width,600)+300,
-        y:scale(results[0].pose.rightWrist.y,video.height,340)+170,
+        x:scale(x,video.width,600)+300,
+        y:scale(y,video.height,340)+170,
       }
-      light.position.copy(rightHand);
+      
+//       rightHand = {
+//         x:scale(rightWrist.x,video.width,600)+300,
+//         y:scale(rightWrist.y,video.height,340)+170,
+//       }
+      
+//       leftHand = {
+//         x:scale(leftWrist.x,video.width,600)+300,
+//         y:scale(leftWrist.y,video.height,340)+170,
+//       }
+      
+      lightR.position.copy(rightHand);
+      lightL.position.copy(rightHand);
       
       let formatedNote = generateNote(rightHand.x,rightHand.y)
       displayText.text = formatedNote.scale + '|' + formatedNote.level
       displayText.position.set(308-displayText.width/2,249)
       mouseOver = true
       changeFrequency(formatedNote.scaleNum,formatedNote.level)
-    }
+      
+    } 
+    
+
+    
+  
 
   }else{
   }
