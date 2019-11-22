@@ -27,7 +27,7 @@ function modelLoaded() {
   poseNet.on("pose", function(results) {
   
   //Only Detect 1 person  
-  if(results.length > 0){
+  if(results.length > 0 && gameActive){
     // flock.toPoint = true
     let scaledPoints = []
     let skeletonPoints = []
@@ -44,6 +44,7 @@ function modelLoaded() {
         y:scale(y,video.height,340)+170,
       }
       
+// Two Hand Ver.      
 //       rightHand = {
 //         x:scale(rightWrist.x,video.width,600)+300,
 //         y:scale(rightWrist.y,video.height,340)+170,

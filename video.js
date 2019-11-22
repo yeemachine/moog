@@ -8,7 +8,7 @@ const getVideo = () => {
   }
 
   // Get access to the camera!
-  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && document.querySelector('video').srcObject === null) {
     
     navigator.mediaDevices.getUserMedia(constraints)
     .then((stream)=>{
@@ -37,5 +37,3 @@ function gotStream(stream) {
   },500);
   
 }
-
-getVideo()
