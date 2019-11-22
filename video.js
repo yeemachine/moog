@@ -1,6 +1,4 @@
-const videoElement = document.querySelector('video');
-
-(() => {
+const getVideo = () => {
 
   const constraints = { 
     video: { 
@@ -16,24 +14,21 @@ const videoElement = document.querySelector('video');
     .then((stream)=>{
       gotStream(stream)
     }).catch(err=>{
-      alert(err)
+      // alert(err)
     });
     
   }
 
-})();
-
+};
 
 function gotStream(stream) {
   
-  videoElement.srcObject = stream;
+  document.querySelector('video').srcObject = stream;
   
   let b = setInterval(()=>{
     
-    if(videoElement.readyState >= 3){
-      
+    if(document.querySelector('video').readyState >= 3){
       poseNetINIT()
-
       //stop checking every half second
       clearInterval(b);
       
@@ -42,3 +37,5 @@ function gotStream(stream) {
   },500);
   
 }
+
+getVideo()
