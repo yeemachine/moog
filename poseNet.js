@@ -41,8 +41,8 @@ function modelLoaded() {
         let y = rightWrist.y < leftWrist.y ? rightWrist.y : leftWrist.y;
 
         rightHand = {
-          x: scale(x, video.width, 600) + 300,
-          y: scale(y, video.height, 340) + 170
+          x: scale(x, video.width, WIDTH) + WIDTH/2,
+          y: scale(y, video.height, HEIGHT) + HEIGHT/2
         };
 
         // Two Hand Ver.
@@ -61,7 +61,7 @@ function modelLoaded() {
 
         let formatedNote = generateNote(rightHand.x, rightHand.y);
         displayText.text = formatedNote.scale + "|" + formatedNote.level;
-        displayText.position.set(308 - displayText.width / 2, 249);
+        displayText.position.set(WIDTH*.51 - displayText.width / 2, HEIGHT * .745);
         changeFrequency(formatedNote.scaleNum, formatedNote.level);
       }
     } else {
@@ -72,30 +72,30 @@ function modelLoaded() {
 const generateNote = (x, y) => {
   let notes = ["G", "F#", "E", "D", "C", "B", "A", "G"];
   let scale =
-      x < 150
+      x < WIDTH/4
         ? "G"
-        : 150 <= x && x < 150 + 300 / 6
+        : WIDTH/4 <= x && x < WIDTH/4 + WIDTH/2 / 6
         ? "A"
-        : 150 + 300 / 8 <= x && x < 150 + (300 / 6) * 2
+        : WIDTH/4 + WIDTH/2 / 8 <= x && x < WIDTH/4 + (WIDTH/2 / 6) * 2
         ? "B"
-        : 150 + (300 / 8) * 2 <= x && x < 150 + (300 / 6) * 3
+        : WIDTH/4 + (WIDTH/2 / 8) * 2 <= x && x < WIDTH/4 + (WIDTH/2 / 6) * 3
         ? "C"
-        : 150 + (300 / 8) * 3 <= x && x < 150 + (300 / 6) * 4
+        : WIDTH/4 + (WIDTH/2 / 8) * 3 <= x && x < WIDTH/4 + (WIDTH/2 / 6) * 4
         ? "D"
-        : 150 + (300 / 8) * 4 <= x && x < 150 + (300 / 6) * 5
+        : WIDTH/4 + (WIDTH/2 / 8) * 4 <= x && x < WIDTH/4 + (WIDTH/2 / 6) * 5
         ? "E"
-        : 150 + (300 / 8) * 5 <= x && x < 450
+        : WIDTH/4 + (WIDTH/2 / 8) * 5 <= x && x < WIDTH * .75
         ? "F#"
-        : x >= 450
+        : x >= WIDTH * .75
         ? "G"
         : "G",
-    level = Math.floor(((340 - y) / 340) * 100);
+    level = Math.floor(((HEIGHT - y) / HEIGHT) * 100);
   return {
     scale: scale,
     scaleNum: x,
     level: level < 0 ? 0 : level > 100 ? 100 : level
   };
-};
+}; 
 
 const scale = (num, in_min, in_max) => {
   return ((num - in_min / 2) * in_max) / in_min;
