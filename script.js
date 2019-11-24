@@ -5,8 +5,10 @@ var app = new PIXI.Application({ width: WIDTH, height: HEIGHT });
 document.querySelector(".canvasContainer").appendChild(app.view);
 
 var stage = (app.stage = new PIXI.display.Stage());
-var lightR = new PIXI.lights.PointLight(0xffbf00, 3);
-var lightL = new PIXI.lights.PointLight(0xffbf00, 3);
+var lightR = new PIXI.lights.PointLight(0xffbf00, 6);
+var lightL = new PIXI.lights.PointLight(0xffbf00, 0);
+var lightC = new PIXI.lights.PointLight(0xff3300, 0);
+
 let displayText;
 let gameActive = false;
 
@@ -64,15 +66,16 @@ function onAssetsLoaded(loader, res) {
   
   [bg,fg,play,pause].forEach((e)=>{
     e.scale = new PIXI.Point(scale, scale)
-    e.interactive = true
   })
+  bg.interactive = true
+  play.interactive = true
   bg.position.set(0, 0);
   fg.position.set(0, HEIGHT*-.0125);
   play.position.set(WIDTH*.45, HEIGHT*.395);
   playLight.position.set(WIDTH*.45, HEIGHT*.395);
   pause.position.set(WIDTH*.0125,HEIGHT*.825);
   
-  [pause,lightR,lightL].forEach(e=>{
+  [pause,lightR,lightL,lightC].forEach(e=>{
     e.visible = false;
   })
   
@@ -80,19 +83,20 @@ function onAssetsLoaded(loader, res) {
 
   stage.addChild(new PIXI.lights.AmbientLight(null, 1));
   stage.addChild(new PIXI.lights.DirectionalLight(null, 1, fg));
-  stage.addChild(lightR, lightL);
+  stage.addChild(lightR, lightL, lightC);
 
   
   let playPause = event => {
     play.visible = !play.visible;
     play.interactive = !play.interactive
     pause.visible = !pause.visible;
+    pause.interactive = !pause.interactive
     playLight.visible = !playLight.visible;
     lightR.visible = !lightR.visible;
     lightL.visible = !lightL.visible;
+    lightC.visible = !lightC.visible;
     lightR.position.copy(event.data.global);
-    lightL.position.copy(event.data.global);
-    gameActive = !gameActive;
+    updateTextAndAudio(event.data.global.x, event.data.global.y)
     getVideo();
     if (!gameActive) {
       gainNode.gain.setTargetAtTime(
@@ -104,40 +108,39 @@ function onAssetsLoaded(loader, res) {
     if (oscillator === null) {
       createOscillator();
     }
+    if (context && gameActive){
+      context.resume()
+    }else{
+      context.suspend()
+    }
   } 
   
   play.on("pointerdown", event => {
-    playPause(event)
+    gameActive = true;
+    playPause(event);
   });
   
   pause.on("pointerdown", event => {
+    gameActive = false;
+    console.log('pause')
     playPause(event)
-    console.log(pause.width)
   });
   
   bg.on("pointermove", function(event) {
     if (gameActive) {
+      lightL.intensity = 0;
       lightR.position.copy(event.data.global);
-      lightL.position.copy(event.data.global);
-      let formatedNote = generateNote(event.data.global.x, event.data.global.y);
-      displayText.text = formatedNote.scale + "|" + formatedNote.level;
-      displayText.position.set(WIDTH*.51 - displayText.width / 2, HEIGHT * .745);
-      changeFrequency(formatedNote.scaleNum, formatedNote.level);
+      updateTextAndAudio(event.data.global.x, event.data.global.y) 
     }
   });
-
-  // let warmLights = [
-  //   { x: 138.23565673828125, y: 163.50717163085938 },
-  //   { x: 240.69415283203125, y: 215.44491577148438 },
-  //   { x: 565.5314331054688, y: 201.13427734375 },
-  //   { x: 491.641357421875, y: 258.89849853515625 },
-  //   { x: 495.38470458984375, y: 16.657516479492188 },
-  //   { x: 71.86392211914062, y: 289.2891845703125 },
-  //   { x: 199.52816772460938, y: 314.953125 },
-  //   { x: 444.4444580078125, y: 317.1068115234375 },
-  //   { x: 395.50982666015625, y: 263.0013427734375 },
-  //   { x: 234.79013061523438, y: 268.43304443359375 }
-  // ];
+  
+  bg.on("pointerdown", function(event) {
+    if (gameActive) {
+      lightL.intensity = 0;
+      lightR.position.copy(event.data.global);
+      updateTextAndAudio(event.data.global.x, event.data.global.y) 
+    }
+  });
   
   let warmLights = [ 
    {x: 0.23039276123046876 * WIDTH, y: 0.4809034459731158 * HEIGHT},
@@ -181,4 +184,11 @@ function onAssetsLoaded(loader, res) {
   //                     stage.addChild(clickLight);
 
   //                 });
+}
+
+const updateTextAndAudio = (x,y) => {
+  let formatedNote = generateNote(x,y);
+  displayText.text = formatedNote.scale + "|" + formatedNote.level;
+  displayText.position.set(WIDTH*.51 - displayText.width / 2, HEIGHT * .745);
+  changeFrequency(formatedNote.scaleNum, formatedNote.level);
 }
