@@ -18,7 +18,7 @@ const getVideo = () => {
         gotStream(stream);
       })
       .catch(err => {
-        // alert(err)
+        alert(err)
       });
   }
 };

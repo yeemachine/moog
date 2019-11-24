@@ -1,4 +1,4 @@
-var context = new AudioContext(),
+var context = new (window.AudioContext || window.webkitAudioContext)(),
   gainNode = context.createGain(),
   oscillator = null;
 

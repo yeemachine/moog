@@ -29,40 +29,59 @@ function modelLoaded() {
   poseNet.on("pose", function(results) {
     //Only Detect 1 person
     if (results.length > 0 && gameActive) {
-      // flock.toPoint = true
       let scaledPoints = [];
       let skeletonPoints = [];
       let rightWrist = results[0].pose.rightWrist;
       let leftWrist = results[0].pose.leftWrist;
-      // console.log(rightHand)
-
-      if (rightWrist.confidence > 0.2 || leftWrist > 0.2) {
-        let x = rightWrist.y < leftWrist.y ? rightWrist.x : leftWrist.x;
-        let y = rightWrist.y < leftWrist.y ? rightWrist.y : leftWrist.y;
-
+      let nose = results[0].pose.nose;
+      
+      if(rightWrist.confidence > .5 && leftWrist.confidence > .5){
+        //Two Hands
         rightHand = {
-          x: scale(x, video.width, WIDTH) + WIDTH/2,
-          y: scale(y, video.height, HEIGHT) + HEIGHT/2
+          x: scale(rightWrist.x, video.width, WIDTH) + WIDTH/2,
+          y: scale(rightWrist.y, video.height, HEIGHT) + HEIGHT/2
         };
-
-        // Two Hand Ver.
-        //       rightHand = {
-        //         x:scale(rightWrist.x,video.width,600)+300,
-        //         y:scale(rightWrist.y,video.height,340)+170,
-        //       }
-
-        //       leftHand = {
-        //         x:scale(leftWrist.x,video.width,600)+300,
-        //         y:scale(leftWrist.y,video.height,340)+170,
-        //       }
-
+        
+        leftHand = {
+          x: scale(leftWrist.x, video.width, WIDTH) + WIDTH/2,
+          y: scale(leftWrist.y, video.height, HEIGHT) + HEIGHT/2
+        };
+        
         lightR.position.copy(rightHand);
-        lightL.position.copy(rightHand);
+        lightL.position.copy(leftHand);
+        lightL.brightness = 6
+        
+        updateTextAndAudio(rightHand.x, leftHand.y) 
+       
+      }else if (rightWrist.confidence > 0.3 || leftWrist.confidence > 0.3) {
 
-        let formatedNote = generateNote(rightHand.x, rightHand.y);
-        displayText.text = formatedNote.scale + "|" + formatedNote.level;
-        displayText.position.set(WIDTH*.51 - displayText.width / 2, HEIGHT * .745);
-        changeFrequency(formatedNote.scaleNum, formatedNote.level);
+          //One Hand
+          let x = rightWrist.y < leftWrist.y ? rightWrist.x : leftWrist.x;
+          let y = rightWrist.y < leftWrist.y ? rightWrist.y : leftWrist.y;
+
+          rightHand = {
+            x: scale(x, video.width, WIDTH) + WIDTH/2,
+            y: scale(y, video.height, HEIGHT) + HEIGHT/2
+          };
+
+          lightR.position.copy(rightHand);
+          lightL.brightness = 0 
+            
+          updateTextAndAudio(rightHand.x, rightHand.y)
+      }else{
+        lightL.brightness = 0
+      }
+      
+      
+      
+      if (nose.confidence > 0.2 ){
+        lightC.position.copy({
+          x:scale(nose.x, video.width, WIDTH) + WIDTH/2,
+          y:scale(nose.y, video.height, HEIGHT) + HEIGHT/2
+        });
+        lightC.brightness = 6
+      }else{
+        lightC.brightness = 0
       }
     } else {
     }
@@ -72,19 +91,19 @@ function modelLoaded() {
 const generateNote = (x, y) => {
   let notes = ["G", "F#", "E", "D", "C", "B", "A", "G"];
   let scale =
-      x < WIDTH/4
+      x < WIDTH * .25
         ? "G"
-        : WIDTH/4 <= x && x < WIDTH/4 + WIDTH/2 / 6
+        : WIDTH * .25 <= x && x < WIDTH * (.25 + .0625)
         ? "A"
-        : WIDTH/4 + WIDTH/2 / 8 <= x && x < WIDTH/4 + (WIDTH/2 / 6) * 2
+        : WIDTH * (.25 + .0625) <= x && x < WIDTH * (.25 + .0625 * 2)
         ? "B"
-        : WIDTH/4 + (WIDTH/2 / 8) * 2 <= x && x < WIDTH/4 + (WIDTH/2 / 6) * 3
+        : WIDTH * (.25 + .0625 * 2) <= x && x < WIDTH * (.25 + .0625 * 3)
         ? "C"
-        : WIDTH/4 + (WIDTH/2 / 8) * 3 <= x && x < WIDTH/4 + (WIDTH/2 / 6) * 4
+        : WIDTH * (.25 + .0625 * 3) <= x && x < WIDTH * (.25 + .0625 * 4)
         ? "D"
-        : WIDTH/4 + (WIDTH/2 / 8) * 4 <= x && x < WIDTH/4 + (WIDTH/2 / 6) * 5
+        : WIDTH * (.25 + .0625 * 4) <= x && x < WIDTH * (.25 + .0625 * 5)
         ? "E"
-        : WIDTH/4 + (WIDTH/2 / 8) * 5 <= x && x < WIDTH * .75
+        : WIDTH * (.25 + .0625 * 5) <= x && x < WIDTH * .75
         ? "F#"
         : x >= WIDTH * .75
         ? "G"
