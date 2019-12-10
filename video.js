@@ -27,7 +27,7 @@ function gotStream(stream) {
   document.querySelector("video").srcObject = stream;
 
   let b = setInterval(() => {
-    if (document.querySelector("video").readyState >= 3) {
+    if (document.querySelector("video").readyState >= 3 && !poseNet) {
       poseNetINIT();
       //stop checking every half second
       clearInterval(b);
