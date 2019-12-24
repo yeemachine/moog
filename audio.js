@@ -43,29 +43,59 @@ type : 'sine'
 })
 
 
-let synth
-synth = new Tone.PolySynth({
-  // "volume": -10,
-  "envelope": {
-    "attack": 0.1,
-    "decay": 0,
-    "sustain": 0.3,
-    "release": 0.2,
-    }
+let synth = new Tone.PolySynth(3, Tone.Synth,{
+  oscillator: {
+    type: "triangle" 
+	},
+  envelope: {
+    attack : 0.005 ,
+    decay : 0.1 ,
+    sustain : 0.3 ,
+    release : 1.5
+    },
+  detune:0
 })
 
-synth.set({"oscillator": {
-          "type": "sine" 
-					}
-});
+// let synth2 = new Tone.PolySynth({
+//   "oscillator": {
+//     "type": "sine" 
+// 	},
+//   "envelope": {
+//     "attack": 0.2,
+//     "decay": 0,
+//     "sustain": 0.6,
+//     "release": 0.4,
+//     },
+//   "detune":-1200,
+//   "filter" : {
+// 		"type" : "highpass"
+// 	}
+// })
+
+let synth2 = new Tone.PolySynth(1, Tone.Synth,{
+  oscillator: {
+    type: "sine" 
+	},
+  envelope: {
+    attack : 0.005 ,
+    decay : 0.5 ,
+    sustain : 0.5 ,
+    release : 1.5
+    }
+})
+synth2.set("detune", -1200);
 
 mainOsc.chain(vibrato,gain1,vol,Tone.Master)
 synth.chain(gain2,vol,Tone.Master)
+synth2.chain(gain2,vol,Tone.Master)
 
 let pattern = new Tone.Pattern(function(time, note){
   // console.log(note)
   if(note !== ''){
     synth.triggerAttackRelease(note, '8n');
+  }
+  if(note.slice(-1)[0] && note.slice(-1)[0] !== ''){
+    synth2.triggerAttackRelease(note.slice(-1)[0], '8n');
   }
 }, orangeStar1 ,'up')
 pattern.loop = true;
