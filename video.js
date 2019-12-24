@@ -1,4 +1,5 @@
-const getVideo = () => {
+let Stream
+const getWebCam = () => {
   const constraints = {
     video: {
       facingMode: "user"
@@ -9,23 +10,28 @@ const getVideo = () => {
   // Get access to the camera!
   if (
     navigator.mediaDevices &&
-    navigator.mediaDevices.getUserMedia &&
-    document.querySelector("video").srcObject === null
+    navigator.mediaDevices.getUserMedia
   ) {
+    if(!Stream || Stream.active === false){
     navigator.mediaDevices
       .getUserMedia(constraints)
       .then(stream => {
+        Stream = stream
         gotStream(stream);
       })
       .catch(err => {
         alert(err)
       });
+    }else{
+      stopStream()
+    }
   }
+  
 };
 
 function gotStream(stream) {
   document.querySelector("video").srcObject = stream;
-
+  console.log('Webcam On')
   let b = setInterval(() => {
     if (document.querySelector("video").readyState >= 3 && !poseNet) {
       poseNetINIT();
@@ -33,4 +39,11 @@ function gotStream(stream) {
       clearInterval(b);
     }
   }, 500);
+}
+
+const stopStream = ()=>{
+  if(Stream){
+    Stream.getTracks().forEach(track => track.stop())
+    console.log('Webcam Off')
+  }
 }

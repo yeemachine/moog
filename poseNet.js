@@ -70,7 +70,7 @@ const processPoses = (results) =>{
 
           lightR.position.copy(rightHand);
           lightL.position.copy(leftHand);
-          lightL.brightness = 6
+          lightL.brightness = 3
 
           updateTextAndAudio(rightHand.x, leftHand.y) 
 
@@ -101,7 +101,7 @@ const processPoses = (results) =>{
           x:scale(nose.position.x, video.width, WIDTH) + WIDTH/2,
           y:scale(nose.position.y, video.height, HEIGHT) + HEIGHT/2
         });
-        lightC.brightness = 6
+        lightC.brightness = 3
       }else{
         lightC.brightness = 0
       }

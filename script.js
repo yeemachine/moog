@@ -1,5 +1,6 @@
-let WIDTH = 600*1.2
-let HEIGHT = 350*1.2
+const isMobile = (/Mobi|Android/i.test(navigator.userAgent))
+let WIDTH = 600*1.5
+let HEIGHT = 350*1.5
 let mouseMoved = 0
 let time = 0
 let amountMoved = 0
@@ -13,34 +14,41 @@ app.ticker.add((delta)=>{
   if(mouseMoved <= 100){
     mouseMoved += 1
   }
-  time+=delta/35
+  time+=delta/50
   if(playLight && !gameActive){
-    playLight.brightness = playLight.brightness + (Math.cos(time)*.05)
+    playLight.brightness = 6 + (Math.cos(time)*2)
   }
   
   if(warmLightContainer.children[0]){
-    warmLightContainer.children[0].brightness = Math.cos(time) * 1.2
-    warmLightContainer.children[1].brightness = Math.cos(time-.8) * 1.2
-    warmLightContainer.children[2].brightness = Math.cos(time-1.6) * 1.2
+    warmLightContainer.children[0].brightness = 1+Math.cos(time) * 1
+    warmLightContainer.children[1].brightness = 1+Math.cos(time-.8) * 1
+    warmLightContainer.children[2].brightness = 1+Math.cos(time-1.6) * 1
+    warmLightContainer.children[3].brightness = 1+Math.cos(time-.4) * 1
   }
   
   let inc = .05
+  let lerpedColor = lerpColor(0xff7f00,0xff3300,amountMoved)
+  let lerpedColor2 = lerpColor(0xff0000,0xff44b4,amountMoved)
   if(bgm){
-    if(amountMoved < 1){
-      let lerpedColor = lerpColor(0xff7f00,0xff3300,amountMoved)
+    if(amountMoved < 1){  
       amountMoved += inc
       playLight.color = 0xff3300
       lightR.color = 0xff3300
       lightL.color = 0xff3300
       lightC.color = 0xff0000
-      bg.position.x = amountMoved * -WIDTH
+      // bg.position.x = amountMoved * -WIDTH
       bg2.position.x = WIDTH - amountMoved * WIDTH
+      songCred.alpha += inc/2
       warmLightContainer.children.forEach((e,i)=>{
-        if (i>2){
+        if(i>3){
           e.color = lerpedColor
         }else{
-          e.position.x -= inc * WIDTH
+          // e.color = lerpedColor2
         }
+        // e.color = lerpedColor
+        // if (i<2){
+        //   e.position.x -= inc * WIDTH
+        // }
       }) 
       if(legato){
         legato=false
@@ -49,20 +57,24 @@ app.ticker.add((delta)=>{
     }
   }else{
     if(amountMoved > 0){
-      let lerpedColor = lerpColor(0xff7f00,0xff3300,amountMoved)
       amountMoved -= inc
       playLight.color = 0xff7f00
       lightR.color = 0xff7f00
       lightL.color = 0xff7f00
       lightC.color = 0xff0000
-      bg.position.x = -WIDTH + (1-amountMoved) * WIDTH 
+      // bg.position.x = -WIDTH + (1-amountMoved) * WIDTH 
       bg2.position.x = (1-amountMoved) * WIDTH
+      songCred.alpha -= inc/2
       warmLightContainer.children.forEach((e,i)=>{
-        if (i>2){
+        if(i>3){
           e.color = lerpedColor
         }else{
-          e.position.x += inc * WIDTH
+          // e.color = lerpedColor2
         }
+         // e.color = lerpedColor
+        // if (i<2){
+        //   e.position.x += inc * WIDTH
+        // }
       }) 
       if(!legato){
         legato=true
@@ -74,10 +86,10 @@ app.ticker.add((delta)=>{
 
 var stage = (app.stage = new PIXI.display.Stage());
 var warmLightContainer = new PIXI.Container();
-var lightR = new PIXI.lights.PointLight(0xff7f00, 3);
-var lightL = new PIXI.lights.PointLight(0xff7f00, 0);
+var lightR = new PIXI.lights.PointLight(0xff7f00, 3, 40);
+var lightL = new PIXI.lights.PointLight(0xff7f00, 0, 40);
 var lightC = new PIXI.lights.PointLight(0xff3300, 0);
-let bg,bg2,fg,play,playLight,pause,songButton,songText1,songText2
+let bg,bg2,fg,play,playLight,pause,songButton,videoButton,cameraLight,songCred
 // var graphics = new PIXI.Graphics();
 // stage.addChild(graphics)
  
@@ -92,7 +104,7 @@ stage.addChild(new PIXI.display.Layer(PIXI.lights.lightGroup));
 PIXI.loader
   .add(
     "bg_diffuse",
-    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FBG.png?v=1573973578540"
+    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FMoog3.jpg?v=1577161410287"
   )
   .add(
     "bg_normal",
@@ -108,23 +120,31 @@ PIXI.loader
   )
   .add(
     "pause_diffuse",
-    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FAsset%2014.png?v=1575955374602"
+    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FPause.png?v=1576389309779"
   )
   .add(
-    "pause_normal",
-    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2Fdownload.png?v=1573973983373"
+    "buttonNormal",
+    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FButtonNormalMap.png?v=1576389309693"
   )
   .add(
       "bg2",
       "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2Fbg2-02.jpg?v=1575853530852"
   )
   .add(
-      "note1",
-      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FSingle-Note.png?v=1575954688617"
+      "wholeNote",
+      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FWholeNote.png"
   )
   .add(
-      "note2",
-      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FDouble-Note.png?v=1575954688592"
+      "eigthNote",
+      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FEightNote.png"
+  )
+  .add(
+      "video",
+      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FVideoPlay.png"
+  )
+  .add(
+      "videoPause",
+      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FVideoPause.png"
   )
   .load(onAssetsLoaded);
 
@@ -144,14 +164,13 @@ function onAssetsLoaded(loader, res) {
   bg2 = createPair(res.bg2.texture, res.bg_normal.texture);
   fg = createPair(res.block_diffuse.texture, res.bg_normal.texture);
   play = createPair(res.play_diffuse.texture, res.bg_normal.texture);
-  pause = createPair(res.pause_diffuse.texture, res.pause_normal.texture);
+  pause = createPair(res.pause_diffuse.texture, res.buttonNormal.texture);
   playLight = new PIXI.lights.PointLight(0xff7f00, 6);
-  songText1 = res.note1.texture
-  songText2 = res.note2.texture
-  songButton = createPair(songText2, res.pause_normal.texture);
+  songButton = createPair(res.eigthNote.texture, res.buttonNormal.texture);
+  videoButton = createPair(res.video.texture, res.buttonNormal.texture);
   let scale = WIDTH/2390 ;
   
-  [bg,bg2,fg,play,pause,songButton].forEach((e)=>{
+  [bg,bg2,fg,play,pause,songButton,videoButton].forEach((e)=>{
     e.scale = new PIXI.Point(scale, scale)
   })
 
@@ -159,55 +178,106 @@ function onAssetsLoaded(loader, res) {
   bg2.position.set(WIDTH,0);
   fg.position.set(0, 0);
   play.position.set(WIDTH*.4, HEIGHT*.3);
-  playLight.position.set(WIDTH*.5, HEIGHT*.5);
-  pause.position.set(WIDTH*.045,HEIGHT*.83);
-  songButton.position.set(WIDTH*.89,HEIGHT*.81);
+  playLight.position.x = play.width/2
+  playLight.position.y = play.height/2
+  pause.position.set(WIDTH*.03,HEIGHT*.81);
+  songButton.position.set(WIDTH*.9,HEIGHT*.81);
+  videoButton.position.set(WIDTH*.9,HEIGHT*.05);
   
   [bg,play].forEach(e=>{
     e.interactive = true;
     console.log(e)
   });
   
-  [pause,lightR,lightL,lightC,songButton].forEach(e=>{
+  [pause,lightR,lightL,lightC,songButton,videoButton].forEach(e=>{
     e.visible = false;
   });
   
-  stage.addChild(bg, bg2, fg, play, playLight, pause, songButton);
-
-  stage.addChild(new PIXI.lights.AmbientLight(null, 1));
-  stage.addChild(new PIXI.lights.DirectionalLight(null, 1, fg));
-  stage.addChild(lightR, lightL, lightC, warmLightContainer);
-
-  
   let playPause = event => {
     
-    [play,playLight,pause,songButton,lightR,lightL,lightC].forEach(e=>{
+    [play,playLight,pause,songButton,videoButton,lightR,lightL,lightC,songCred].forEach(e=>{
       e.visible = !e.visible;
     });
     
-    [play,pause,songButton].forEach(e=>{
+    [play,pause,songButton,videoButton,stage].forEach(e=>{
       e.interactive = !e.interactive;
     });
     
     lightR.position.copy(event.data.global);
     updateTextAndAudio(event.data.global.x, event.data.global.y)
-    getVideo();
-    // if (!gameActive) {
-    //   gainNode.gain.setTargetAtTime(
-    //     calculateGain(0),
-    //     context.currentTime,
-    //     0.001
-    //   );
-    // }
-    // if (oscillator === null) {
-    //   createOscillator();
-    // }
-    // if (context && gameActive){
-    //   context.resume()
-    // }else{
-    //   context.suspend()
-    // }
+    document.querySelector('.canvasContainer').classList.toggle('active')
+    
   } 
+  
+  let warmLights = [ 
+   {x: 0.13039276123046876 * WIDTH, y: 0.4809034459731158 * HEIGHT, color:0xff0000},
+   {x: 0.40115692138671877 * WIDTH, y: 0.3336615169749541 * HEIGHT, color:0xff0000},
+   {x: 0.9425523885091146 * WIDTH, y: 0.5915714039522059 * HEIGHT, color:0xff0000},
+   {x: 0.7425523885091146 * WIDTH, y: 0.1915714039522059 * HEIGHT, color:0xff0000},
+    
+   {x: 0.8194022623697916 * WIDTH, y: 0.7614661721622242 * HEIGHT, color:0xff7f00},
+   {x: 0.8256411743164063 * WIDTH, y: 0.0489926955279182 * HEIGHT, color:0xff7f00},
+   {x: 0.11977320353190105 * WIDTH, y: 0.8508505428538603 * HEIGHT, color:0xff7f00},
+   {x: 0.33254694620768227 * WIDTH, y: 0.9263327205882353 * HEIGHT, color:0xff7f00},
+   {x: 0.7407407633463542 * WIDTH, y: 0.9326670927159927 * HEIGHT, color:0xff7f00},
+   {x: 0.6591830444335938 * WIDTH, y: 0.7735333610983456 * HEIGHT, color:0xff7f00},
+   {x: 0.39131688435872397 * WIDTH, y: 0.789508954216 * HEIGHT, color:0xff7f00}
+  ];
+
+  warmLights.forEach(e => {
+    let warmpointLight = new PIXI.lights.PointLight(e.color, 1.2);
+    warmpointLight.position.copy(e);
+    warmLightContainer.addChild(warmpointLight);
+  });
+  
+  cameraLight = new PIXI.lights.PointLight(0xff0000, 0, 40);
+  cameraLight.position.x = videoButton.position.x + videoButton.width/2
+  cameraLight.position.y = videoButton.position.y + videoButton.height/2
+
+  stage.addChild(bg, bg2, fg, play, playLight, pause, songButton, videoButton);
+  stage.addChild(new PIXI.lights.AmbientLight(null, 1));
+  stage.addChild(new PIXI.lights.DirectionalLight(null, 1, fg));
+  stage.addChild(lightR, lightL, lightC, warmLightContainer, cameraLight);
+  
+  document.fonts.load('10pt "B612 Mono"').then(() => {
+    displayText = new PIXI.Text("", {
+      fontFamily: "B612 Mono",
+      fontSize: WIDTH/30,
+      fill: 0xff7f00,
+      align: "center"
+    });
+    displayText.position.set(WIDTH*.51 - displayText.width / 2, HEIGHT * .5);
+    stage.addChild(displayText);
+    
+    songCred = new PIXI.Text("♪ Alice in 冷凍庫【Orangestar feat. IA】", {
+      fontFamily: "B612 Mono",
+      fontSize: WIDTH/45,
+      fill: 0xffffff,
+      align: "center"
+    });
+    
+    songCred.position.set(WIDTH*.05, HEIGHT*.1 - songCred.height/2);
+    songCred.alpha = 0;
+    songCred.visible = false;
+    console.log(songCred)
+    stage.addChild(songCred)
+  });
+    // console.log(displayText)
+    
+    
+  videoButton.on('pointerdown', function(event){
+    console.log('video')
+    if (gameActive) {
+      getWebCam()
+      if(this.children[0].texture === res.video.texture){
+        this.children[0].texture = res.videoPause.texture
+        cameraLight.brightness = 6
+      }else{
+        this.children[0].texture = res.video.texture
+        cameraLight.brightness = 0
+      }
+    }
+  })
   
   songButton.on('pointerdown', function(event){
     console.log('song')
@@ -218,10 +288,10 @@ function onAssetsLoaded(loader, res) {
       updateTextAndAudio(event.data.global.x, event.data.global.y) 
       if(bgm){
         pattern.start()
-        songButton.children[0].texture = songText1
+        songButton.children[0].texture = res.wholeNote.texture
       }else{
         pattern.stop()
-        songButton.children[0].texture = songText2
+        songButton.children[0].texture = res.eigthNote.texture
       }
     }
   })
@@ -271,51 +341,20 @@ function onAssetsLoaded(loader, res) {
       updateTextAndAudio(event.data.global.x, event.data.global.y) 
     }
   });
-  
-
-  
-  let warmLights = [ 
-   {x: 0.23039276123046876 * WIDTH, y: 0.4809034459731158 * HEIGHT, color:0xff0000},
-   {x: 0.40115692138671877 * WIDTH, y: 0.6336615169749541 * HEIGHT, color:0xff0000},
-   {x: 0.9425523885091146 * WIDTH, y: 0.5915714039522059 * HEIGHT, color:0xff0000},
-   {x: 0.8194022623697916 * WIDTH, y: 0.7614661721622242 * HEIGHT, color:0xff7f00},
-   {x: 0.8256411743164063 * WIDTH, y: 0.0489926955279182 * HEIGHT, color:0xff7f00},
-   {x: 0.11977320353190105 * WIDTH, y: 0.8508505428538603 * HEIGHT, color:0xff7f00},
-   {x: 0.33254694620768227 * WIDTH, y: 0.9263327205882353 * HEIGHT, color:0xff7f00},
-   {x: 0.7407407633463542 * WIDTH, y: 0.9326670927159927 * HEIGHT, color:0xff7f00},
-   {x: 0.6591830444335938 * WIDTH, y: 0.7735333610983456 * HEIGHT, color:0xff7f00},
-   {x: 0.39131688435872397 * WIDTH, y: 0.789508954216 * HEIGHT, color:0xff7f00}
-  ];
-
-  warmLights.forEach(e => {
-    let warmpointLight = new PIXI.lights.PointLight(e.color, 1.2);
-    warmpointLight.position.copy(e);
-    warmLightContainer.addChild(warmpointLight);
-  });
-
-  document.fonts.load('10pt "IBM Plex Mono"').then(() => {
-    displayText = new PIXI.Text("", {
-      fontFamily: "IBM Plex Mono",
-      fontSize: WIDTH/30,
-      fill: 0xff7f00,
-      align: "center"
-    });
-    displayText.position.set(WIDTH*.51 - displayText.width / 2, HEIGHT * .5);
-    stage.addChild(displayText);
-    // console.log(displayText)
-  });
+    
 
   //For staging new lights
-  //                 let lightPos = []
+//                   let lightPos = []
 
-  //                 bg.on('pointerdown', function (event) {
-  //                     var clickLight = new PIXI.lights.PointLight(0xff7f00);
-  //                     clickLight.position.copy(event.data.global);
-  //                     lightPos.push(JSON.stringify(event.data.global))
-  //                     console.log(lightPos)
-  //                     stage.addChild(clickLight);
+//                   bg.on('pointerdown', function (event) {
+//                       var clickLight = new PIXI.lights.PointLight(0xff0000,6);
+//                       clickLight.position.copy(event.data.global);
+                    
+//                       lightPos.push(JSON.stringify(event.data.global))
+//                       console.log(lightPos)
+//                       stage.addChild(clickLight);
 
-  //                 });
+//                   });
 }
  
 const lerpColor = function(a, b, amount) {
