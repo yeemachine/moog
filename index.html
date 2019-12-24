@@ -12,6 +12,7 @@
       href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono&display=swap"
       rel="stylesheet"
     />
+    <link href="https://fonts.googleapis.com/css?family=B612+Mono&display=swap" rel="stylesheet">
     <style>
       body {
         margin: 0;
@@ -41,6 +42,12 @@
         border-radius: 8px;
         overflow: hidden;
       }
+      .canvasContainer:hover{
+        cursor:pointer
+      }
+      .canvasContainer.active:hover{
+        cursor:none;
+      }
       svg{
         position:absolute;
         width: 100%;
@@ -60,7 +67,6 @@
     <script src="./pixi.min.js"></script>
     <script src="./pixi-layers.js"></script>
     <script src="./pixi-lights.js"></script>
-    <script src="./easing.js"></script>
     <script src="./poseNet.js" defer></script>
     <script src="./video.js" defer></script>
     <script src="./script.js" defer></script>

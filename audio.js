@@ -16,9 +16,11 @@ let notes = fMajor,
     bgm = false,
     vol = new Tone.Volume(0);
     gain1 = new Tone.Gain(0);
-    gain2 = new Tone.Gain(.1)
+    gain2 = new Tone.Gain(.4)
 
-Tone.context.latencyHint = 'fastest'
+if(!isMobile){
+  Tone.context.latencyHint = 'fastest';
+}
 
 let mainOsc = new Tone.OmniOscillator ({
 frequency : 440 ,
@@ -124,7 +126,7 @@ const updateTextAndAudio = (x,y) => {
   bpm = 146 + currentNote.yScaled*60
   
   vibrato.frequency.value = currentNote.yScaled * 10
-  gain1.gain.value = currentNote.yScaled * .05
+  gain1.gain.value = currentNote.yScaled * .1
   
   if(bgm === true){
     Tone.Transport.bpm.value = bpm
