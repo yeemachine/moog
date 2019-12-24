@@ -104,7 +104,7 @@ stage.addChild(new PIXI.display.Layer(PIXI.lights.lightGroup));
 PIXI.loader
   .add(
     "bg_diffuse",
-    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FMoog3.jpg?v=1577161410287"
+    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FMoog2.jpg?v=1577159332224"
   )
   .add(
     "bg_normal",
