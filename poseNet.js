@@ -60,7 +60,7 @@ const processPoses = (results) =>{
           //Two Hands
           rightHand = {
             x: scale(rightWrist.position.x, video.width, WIDTH) + WIDTH/2,
-            y: scale(rightWrist.position.y, video.height, HEIGHT) + HEIGHT/2
+            y: scale(rightWrist.position.y, video.height, HEIGHT) + HEIGHT/2,
           };
 
           leftHand = {
@@ -72,11 +72,24 @@ const processPoses = (results) =>{
           lightL.position.copy(leftHand);
           lightL.brightness = 3
 
-          updateTextAndAudio(rightHand.x, leftHand.y) 
+          updateTextAndAudio(rightHand.x, leftHand.y)
+          
+          let leftText = (leftHand.y > 0 && leftHand.y < .33) ? 'b'
+            :(leftHand.y >= 33 && leftHand.y < .66) ? 'c'
+            :'d';
+          
+          let rightText = (rightHand.y > 0 && rightHand.y < .33) ? '2'
+            :(rightHand.y >= 33 && rightHand.y < .66) ? '3'
+            :'4';
+          
+          displayText3.text = 'c_4'
+          displayText3.alpha = 1
+          
 
         }else if (rightWrist.score > 0.2 || leftWrist.score > 0.2) {
 
             //One Hand
+            let domHand = rightWrist.position.y < leftWrist.position.y ? 'left' : 'right';
             let x = rightWrist.position.y < leftWrist.position.y ? rightWrist.position.x : leftWrist.position.x;
             let y = rightWrist.position.y < leftWrist.position.y ? rightWrist.position.y : leftWrist.position.y;
 
@@ -89,8 +102,26 @@ const processPoses = (results) =>{
             lightL.brightness = 0 
 
             updateTextAndAudio(rightHand.x, rightHand.y)
+          
+            let leftText,rightText
+            if(domHand === 'left'){
+              leftText = (rightHand.y > 0 && rightHand.y < .33) ? 'b'
+              :(rightHand.y >= 33 && rightHand.y < .66) ? 'c'
+              :'d';
+              rightText = '1'
+            }else{
+              leftText = 'a'
+              rightText = (rightHand.y > 0 && rightHand.y < .33) ? '2'
+              :(rightHand.y >= 33 && rightHand.y < .66) ? '3'
+              :'4';
+            }
+
+            displayText3.text = 'a_4'
+            displayText3.alpha = 1
+           
         }else{
           lightL.brightness = 0
+          displayText3.text = 'a_1'
         }
       }
       

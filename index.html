@@ -8,16 +8,37 @@
       content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui"
     />
     <title>Robert Moog's 86th Birthday</title>
-    <link
-      href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono&display=swap"
-      rel="stylesheet"
-    />
-    <link href="https://fonts.googleapis.com/css?family=B612+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
     <style>
+      @font-face {
+        font-family: 'America Mono';
+        src: url(https://cdn.glitch.com/c8411ee0-b2bb-481b-8835-6b597f185b9c%2FGT-America-Mono-Bold.otf);
+        font-weight: bold;
+      }
+      @font-face {
+        font-family: 'America Mono';
+        src: url(https://cdn.glitch.com/c8411ee0-b2bb-481b-8835-6b597f185b9c%2FGT-America-Mono-Regular.otf);
+        font-weight: normal;
+      }
+      @font-face {
+        font-family: 'America Mono';
+        src: url(https://cdn.glitch.com/c8411ee0-b2bb-481b-8835-6b597f185b9c%2FGT-America-Mono-Regular-Italic.otf);
+        font-style: italic;
+      }
+       @font-face {
+        font-family: 'Pose Font';
+        src: url(https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2Ficomoon.woff);
+        font-weight: normal;
+      }
       body {
         margin: 0;
         padding: 0;
         background: white;
+        transition:background 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+      }
+      body.dark{
+        background:#0f0f0f
       }
       video {
         opacity: 0;
@@ -59,6 +80,20 @@
       svg.scaled{
 /*         transform:scale(1.1) */
       }
+      nav{
+        position:fixed;
+        top:24px;
+        right:24px;
+      }
+      nav .material-icons{
+        font-size:32px
+      }
+      nav .material-icons:hover{
+        cursor:pointer;
+      }
+      .dark .material-icons{
+        color:#f0f0f0;
+      }
     </style>
 <!--     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script> -->
@@ -72,7 +107,12 @@
     <script src="./script.js" defer></script>
     <script src="./audio.js" defer></script>
   </head>
-  <body>
+  <body class="dark">
+    <nav>
+      <i class="material-icons">
+        brightness_medium
+      </i>
+    </nav>
     <div class="canvasContainer">
       <canvas
         width="600"
@@ -85,18 +125,23 @@
           rect {
             -webkit-mask: url(#mask);
             mask: url(#mask);
+            fill:#fff;
+            transition:fill 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+          }
+          .dark #maskColor{
+            fill:#0f0f0f
           }
         </style>
         <mask id="mask" x="0" y="0" width="100%" height="100%" >
           <rect x="-10%" y="-10%" width="120%" height="120%" fill="white"/>
           <path class="squircle"  d="M2215.46,1305c-677.2,51-1353.67,51-2034.12,0-49.38-3.7-104-52.5-113.59-97.9-75.38-357.2-86.33-709.43,0-1064.14C80,93.27,132,48.84,181.34,45,861.79-7.46,1536.76-6,2215.46,45c49.38,3.71,101.76,48.13,113.59,97.9,85.16,358.08,83.66,713.56,0,1064.14C2317.18,1256.83,2264.8,1300.76,2215.46,1305Z">
-           <animate id="animation" attributeName="d" 
-             dur=".25s" fill="freeze"/>
+           <animate id="animation" attributeName="d" calcMode="spline"
+             dur=".25s" fill="freeze" keySplines="0.19 1 0.22 1"/>
           </path>
         </mask>
       </defs>
       <title>Theremin</title>
-      <rect x="-10%" y="-10%" width="120%" height="120%" fill="white"/>
+      <rect id="maskColor" x="-10%" y="-10%" width="120%" height="120%" fill="white"/>
     </svg>
     </div>
     <video autoplay muted playsinline width="600" height="350"></video>
