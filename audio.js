@@ -1,11 +1,14 @@
 const fMajor = ['C5','D5','E5','F5','G5','A5','Bb5','C6']
-const orangeStar1 = [['F4','Bb3'],['F4','Bb3'],['C5','Bb3'],['F4','Bb3'],['Bb4','Bb3'],['A4','F4','Bb3'],['F4','Bb3'],['C5','F4','Bb3'],['Bb3'],['C5','F4','Bb3'],['Bb4','Bb3'],['A4','F4','Bb3'],['Bb4','Bb3'],['A4','F4','Bb3'],['F4','Bb3'],['C4','F4','Bb3'], 
+
+const orangeStar1 = [
+['F4','Bb3'],['F4','Bb3'],['C5','Bb3'],['F4','Bb3'],['Bb4','Bb3'],['A4','F4','Bb3'],['F4','Bb3'],['C5','F4','Bb3'],['Bb3'],['C5','F4','Bb3'],['Bb4','Bb3'],['A4','F4','Bb3'],['Bb4','Bb3'],['A4','F4','Bb3'],['F4','Bb3'],['C4','F4','Bb3'], 
   
 ['F4','F3'],['F4','F3'],['C5','F3'],['F4','F3'],['Bb4','F3'],['A4','F4','F3'],['F4','F3'],['C5','F4','F3'],['F3'],['C5','F4','F3'],['Bb4','F3'],['A4','F4','F3'],['Bb4','F3'],['A4','F4','F3'],['F4','F3'],['C4','F4','F3'],
   
 ['F4','G3'],['F4','G3'],['C5','G3'],['F4','G3'],['Bb4','G3'],['A4','F4','G3'],['F4','G3'],['C5','F4','G3'],['G3'],['C5','F4','G3'],['Bb4','G3'],['A4','F4','G3'],['Bb4','G3'],['A4','F4','G3'],['F4','G3'],['C4','F4','G3'],
   
-['F4','A3'],['F4','A3'],['C5','A3'],['F4','A3'],['Bb4','A3'],['A4','F4','A3'],['F4','A3'],['C5','F4','A3'],'',['C5','F4',''],['Bb4',''],['A4','F4',''],['Bb4',''],['A4','F4',''],['F4',''],['C4','F4','']]
+['F4','A3'],['F4','A3'],['C5','A3'],['F4','A3'],['Bb4','A3'],['A4','F4','A3'],['F4','A3'],['C5','F4','A3'],'',['C5','F4',''],['Bb4',''],['A4','F4',''],['Bb4',''],['A4','F4',''],['F4',''],['C4','F4','']
+]
 
 let notes = fMajor,
     minFrequency = new Tone().toFrequency(notes[0]),
@@ -21,6 +24,8 @@ let notes = fMajor,
 if(!isMobile){
   Tone.context.latencyHint = 'fastest';
 }
+
+Tone.Transport.bpm.value = 187
 
 let mainOsc = new Tone.OmniOscillator ({
 frequency : 440 ,
@@ -56,26 +61,19 @@ let synth = new Tone.PolySynth(3, Tone.Synth,{
   detune:0
 })
 
-// let synth2 = new Tone.PolySynth({
-//   "oscillator": {
-//     "type": "sine" 
-// 	},
-//   "envelope": {
-//     "attack": 0.2,
-//     "decay": 0,
-//     "sustain": 0.6,
-//     "release": 0.4,
-//     },
-//   "detune":-1200,
-//   "filter" : {
-// 		"type" : "highpass"
-// 	}
-// })
+var phaser = new Tone.Phaser({
+	frequency : 0
+})
+
+let feedback = new Tone.FeedbackEffect ()
+var delay = new Tone.FeedbackDelay(0.5);
+let reverb = new Tone.JCReverb ({roomSize : 0})
 
 let synth2 = new Tone.PolySynth(1, Tone.Synth,{
   oscillator: {
-    type: "sine" 
+    type: "square" 
 	},
+  volume : -13 ,
   envelope: {
     attack : 0.005 ,
     decay : 0.5 ,
@@ -87,10 +85,9 @@ synth2.set("detune", -1200);
 
 mainOsc.chain(vibrato,gain1,vol,Tone.Master)
 synth.chain(gain2,vol,Tone.Master)
-synth2.chain(gain2,vol,Tone.Master)
+synth2.chain(phaser,gain2,vol,Tone.Master)
 
 let pattern = new Tone.Pattern(function(time, note){
-  // console.log(note)
   if(note !== ''){
     synth.triggerAttackRelease(note, '8n');
   }
@@ -150,7 +147,6 @@ const updateTextAndAudio = (x,y) => {
   if(mainOsc.frequency.value !== newFreq){
     mainOsc.frequency.value = newFreq
   }else{
-    // console.log('theSame')
   }
   
   bpm = 146 + currentNote.yScaled*60
@@ -159,81 +155,39 @@ const updateTextAndAudio = (x,y) => {
   gain1.gain.value = currentNote.yScaled * .1
   
   if(bgm === true){
-    Tone.Transport.bpm.value = bpm
+
+    synth.set({
+      "envelope" : {
+      "attack" : 0.005 + (1-currentNote.xScaled) * .05,
+      "sustain" : 0.51 - (1-currentNote.yScaled) * 0.5
+    }
+    });
+    knob3.rotation = -.8 * Math.PI + currentNote.xScaled * 1.6 * Math.PI;
+    knob4.rotation = -.8 * Math.PI + currentNote.yScaled * 1.6 * Math.PI;
+    for (let i=0; i<4; i++){
+      warmLightContainer.children[i].color = lerpColor(0xff0000,0xff7f00,(currentNote.xScaled))
+    }
+    timeFreq = 5 + 45*(1-currentNote.yScaled) 
+  }else{
+    knob3.rotation = -.8 * Math.PI
+    knob4.rotation = -.8 * Math.PI
   }
   
-  displayText.text = 
-    bgm ? currentNote.noteString.replace(/\d+/g, '') + "|" + Math.floor(bpm) 
-    : currentNote.noteString.replace(/\d+/g, '') ;
+  knob1.rotation = -.8 * Math.PI + (currentNote.yScaled) * 1.6 * Math.PI;
+  knob2.rotation = -.8 * Math.PI + (currentNote.xScaled) * 1.6 * Math.PI;
   
-  displayText.position.set(WIDTH*.51 - displayText.width / 2, HEIGHT * .73);
+  displayText.text = currentNote.noteString.replace(/\d+/g, '').replace('b','ᵇ')
+  displayText2.text = pad(Math.floor(currentNote.yScaled*100), 3)
   
-  // graphics.clear()
-  // graphics.lineStyle(2, 0xffbf00, 1);
-  // graphics.alpha = 0.5
-  // graphics.moveTo(0,y);
-  // graphics.lineTo(WIDTH, y);
-  // graphics.moveTo(x,0);
-  // graphics.lineTo(x, HEIGHT);
+  if(mouseMoved <= 100){
+    displayText3.text = 'a_1'
+    displayText3.alpha = 0.3
+  }
+
 }
 
-
-// var calculateFrequency = function(x) {
-//   var minFrequency = 391.99543598174927 || 0, //G4
-//     maxFrequency = 783.9908719634986 || 0; //G5
-//   let calcFreq = x * (maxFrequency - minFrequency) + minFrequency
-//   return calcFreq;
-// };
-
-
-// var context = new (window.AudioContext || window.webkitAudioContext)(),
-//   gainNode = context.createGain(),
-//   oscillator = null,
-//   distortion = context.createWaveShaper();
-
-// gainNode.connect(context.destination);
-
-// var calculateFrequency = function(x,xMin,xMax) {
-//   var minFrequency = 391.99543598174927, //C1
-//     maxFrequency = 783.9908719634986; //C6
-//   let calcFreq = (x-xMin) / (xMax-xMin) * (maxFrequency - minFrequency) + minFrequency
-//   return calcFreq;
-// };
-
-// var calculateGain = function(mouseYPosition) {
-//   var minGain = 0,
-//     maxGain = 0.1;
-
-//   return (mouseYPosition / 100) * maxGain + minGain;
-// };
-
-// var calculateDB = function(mouseYPosition) {
-//   var minGain = -48,
-//     maxGain = 48;
-
-//   return (mouseYPosition / 100) * maxGain + minGain;
-// };
-
-// var createOscillator = function(e) {
-//   oscillator = context.createOscillator();
-//   oscillator.frequency.setTargetAtTime(
-//     calculateFrequency(0),
-//     context.currentTime,
-//     0.001
-//   );
-//   oscillator.type = 'sawtooth'
-//   gainNode.gain.setTargetAtTime(calculateGain(0), context.currentTime, 0.001);
-//   oscillator.connect(gainNode);
-//   oscillator.start(context.currentTime);
-// };
-
-// var changeFrequency = function(x, y) {
-//   if (oscillator) {
-//     oscillator.frequency.setTargetAtTime(
-//       calculateFrequency(x),
-//       context.currentTime,
-//       0.001
-//     );
-//     gainNode.gain.setTargetAtTime(calculateGain(y), context.currentTime, 0.001);
-//   }
-// };
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}

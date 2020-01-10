@@ -1,8 +1,10 @@
 const isMobile = (/Mobi|Android/i.test(navigator.userAgent))
 let WIDTH = 600*1.5
 let HEIGHT = 350*1.5
+let stageScale = WIDTH/2390 ;
 let mouseMoved = 0
 let time = 0
+let timeFreq = 50
 let amountMoved = 0
 let svgMask = document.querySelector('svg')
 let svgPath1 = "M2215.46,1305c-677.2,51-1353.67,51-2034.12,0-49.38-3.7-104-52.5-113.59-97.9-75.38-357.2-86.33-709.43,0-1064.14C80,93.27,132,48.84,181.34,45,861.79-7.46,1536.76-6,2215.46,45c49.38,3.71,101.76,48.13,113.59,97.9,85.16,358.08,83.66,713.56,0,1064.14C2317.18,1256.83,2264.8,1300.76,2215.46,1305Z"
@@ -11,12 +13,57 @@ let svgPath2 = "M2304,1347c-46,2-2023,0-2211,0-48.25,0-88.5-42.75-89-90C.14,892,
 var app = new PIXI.Application({ width: WIDTH, height: HEIGHT });
 document.querySelector(".canvasContainer").appendChild(app.view);
 app.ticker.add((delta)=>{
+  time+=delta/timeFreq
+  let inc = .05
+  let lerpedColor = lerpColor(0xff7f00,0xff3300,amountMoved)
+  
   if(mouseMoved <= 100){
     mouseMoved += 1
   }
-  time+=delta/50
+  
+  
   if(playLight && !gameActive){
     playLight.brightness = 6 + (Math.cos(time)*2)
+  }
+  
+  if(theremin){
+
+    if(gameActive && theremin.scale.x < stageScale * 1.15){
+      theremin.scale = new PIXI.Point(theremin.scale.x+stageScale*.0125, theremin.scale.y+stageScale*.0125)
+      theremin.position.set((WIDTH-theremin.width)/1.8, (HEIGHT-theremin.height)/2);
+      
+      fg.scale = new PIXI.Point(theremin.scale.x+stageScale*.015, theremin.scale.y+stageScale*.015)
+      fg.position.set((WIDTH-fg.width)/2, (HEIGHT-fg.height)/1.8);
+      
+      if(bgm){
+          bg2.scale = new PIXI.Point(bg2.scale.x-stageScale*.0025, bg2.scale.y-stageScale*.0025)
+          bg2.position.x = (WIDTH-bg2.width)/2;
+      }else{
+          bg.scale = new PIXI.Point(bg.scale.x-stageScale*.0025, bg.scale.y-stageScale*.0025)
+          bg.position.x = (WIDTH-bg.width)/2;
+        
+      }
+
+      
+      
+      
+    }else if(!gameActive && theremin.scale.x > stageScale * .99){
+      console.log(theremin.scale.x)
+      theremin.scale = new PIXI.Point(theremin.scale.x-stageScale*.0125, theremin.scale.y-stageScale*.0125)
+      theremin.position.set((WIDTH-theremin.width)/1.8, (HEIGHT-theremin.height)/2);
+      
+      fg.scale = new PIXI.Point(theremin.scale.x-stageScale*.02, theremin.scale.y-stageScale*.02)
+      fg.position.set((WIDTH-fg.width)/2, (HEIGHT-fg.height)/2);
+      
+      if(bgm){
+        bg2.scale = new PIXI.Point(bg2.scale.x+stageScale*.0025, bg2.scale.y+stageScale*.0025)
+        bg2.position.x = (WIDTH-bg2.width)/2;
+      }else{
+        bg.scale = new PIXI.Point(bg.scale.x+stageScale*.0025, bg.scale.y+stageScale*.0025)
+        bg.position.x = (WIDTH-bg.width)/2;
+      }
+    }
+    
   }
   
   if(warmLightContainer.children[0]){
@@ -25,10 +72,7 @@ app.ticker.add((delta)=>{
     warmLightContainer.children[2].brightness = 1+Math.cos(time-1.6) * 1
     warmLightContainer.children[3].brightness = 1+Math.cos(time-.4) * 1
   }
-  
-  let inc = .05
-  let lerpedColor = lerpColor(0xff7f00,0xff3300,amountMoved)
-  let lerpedColor2 = lerpColor(0xff0000,0xff44b4,amountMoved)
+
   if(bgm){
     if(amountMoved < 1){  
       amountMoved += inc
@@ -36,24 +80,20 @@ app.ticker.add((delta)=>{
       lightR.color = 0xff3300
       lightL.color = 0xff3300
       lightC.color = 0xff0000
-      // bg.position.x = amountMoved * -WIDTH
       bg2.position.x = WIDTH - amountMoved * WIDTH
-      songCred.alpha += inc/2
+      songCred.alpha += inc
       warmLightContainer.children.forEach((e,i)=>{
         if(i>3){
           e.color = lerpedColor
         }else{
-          // e.color = lerpedColor2
         }
-        // e.color = lerpedColor
-        // if (i<2){
-        //   e.position.x -= inc * WIDTH
-        // }
       }) 
       if(legato){
         legato=false
       }
-      displayText.style.fill = lerpedColor
+      [displayText,displayText2,displayText3].forEach(e=>{
+        e.style.fill = lerpedColor
+      });
     }
   }else{
     if(amountMoved > 0){
@@ -64,22 +104,19 @@ app.ticker.add((delta)=>{
       lightC.color = 0xff0000
       // bg.position.x = -WIDTH + (1-amountMoved) * WIDTH 
       bg2.position.x = (1-amountMoved) * WIDTH
-      songCred.alpha -= inc/2
+      songCred.alpha -= inc
       warmLightContainer.children.forEach((e,i)=>{
         if(i>3){
           e.color = lerpedColor
         }else{
-          // e.color = lerpedColor2
         }
-         // e.color = lerpedColor
-        // if (i<2){
-        //   e.position.x += inc * WIDTH
-        // }
       }) 
       if(!legato){
         legato=true
       }
-      displayText.style.fill = lerpedColor
+      [displayText,displayText2,displayText3].forEach(e=>{
+        e.style.fill = lerpedColor
+      });
     }
   }
 })
@@ -89,11 +126,12 @@ var warmLightContainer = new PIXI.Container();
 var lightR = new PIXI.lights.PointLight(0xff7f00, 3, 40);
 var lightL = new PIXI.lights.PointLight(0xff7f00, 0, 40);
 var lightC = new PIXI.lights.PointLight(0xff3300, 0);
-let bg,bg2,fg,play,playLight,pause,songButton,videoButton,cameraLight,songCred
-// var graphics = new PIXI.Graphics();
-// stage.addChild(graphics)
+let bg,bg2,fg,theremin,
+    play,playLight,
+    pause,songButton,videoButton,cameraLight,songCred,
+    knob1,knob2,knob3,knob4
  
-let displayText,
+let displayText,displayText2,displayText3,displayText4
     gameActive = false;
 
 // Put all layers for deferred rendering of normals
@@ -112,7 +150,11 @@ PIXI.loader
   )
   .add(
     "block_diffuse",
-    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FTheremin.png?v=1573977008542"
+    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FTheremin.png?v=1578116116353"
+  )
+  .add(
+    "fg_diffuse",
+    "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FFG.png?v=1578116118337"
   )
   .add(
     "play_diffuse",
@@ -128,7 +170,7 @@ PIXI.loader
   )
   .add(
       "bg2",
-      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2Fbg2-02.jpg?v=1575853530852"
+      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FBG2-2.jpg?v=1578135634873"
   )
   .add(
       "wholeNote",
@@ -146,6 +188,14 @@ PIXI.loader
       "videoPause",
       "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FVideoPause.png"
   )
+  .add(
+      "knob_normal",
+      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FKnob_normal.jpg?v=1578116121032"
+  )
+  .add(
+      "knob_diffuse",
+      "https://cdn.glitch.com/e352d3ca-2e03-47f1-acfd-675dff041f5f%2FKnob.png?v=1578209346680"
+  )
   .load(onAssetsLoaded);
 
 function createPair(diffuseTex, normalTex) {
@@ -162,31 +212,62 @@ function createPair(diffuseTex, normalTex) {
 function onAssetsLoaded(loader, res) {
   bg = createPair(res.bg_diffuse.texture, res.bg_normal.texture);
   bg2 = createPair(res.bg2.texture, res.bg_normal.texture);
-  fg = createPair(res.block_diffuse.texture, res.bg_normal.texture);
+  fg = createPair(res.fg_diffuse.texture, res.bg_normal.texture);
+  theremin = createPair(res.block_diffuse.texture, res.bg_normal.texture);
   play = createPair(res.play_diffuse.texture, res.bg_normal.texture);
   pause = createPair(res.pause_diffuse.texture, res.buttonNormal.texture);
   playLight = new PIXI.lights.PointLight(0xff7f00, 6);
   songButton = createPair(res.eigthNote.texture, res.buttonNormal.texture);
   videoButton = createPair(res.video.texture, res.buttonNormal.texture);
-  let scale = WIDTH/2390 ;
   
-  [bg,bg2,fg,play,pause,songButton,videoButton].forEach((e)=>{
-    e.scale = new PIXI.Point(scale, scale)
+//   knob1 = createPair(res.knob_diffuse.texture, res.knob_normal.texture);
+//   knob2 = createPair(res.knob_diffuse.texture, res.knob_normal.texture);
+//   knob3 = createPair(res.knob_diffuse.texture, res.knob_normal.texture);
+  
+  knob1 = new PIXI.Sprite(res.knob_diffuse.texture);
+  knob2 = new PIXI.Sprite(res.knob_diffuse.texture);
+  knob3 = new PIXI.Sprite(res.knob_diffuse.texture);
+  knob4 = new PIXI.Sprite(res.knob_diffuse.texture);
+  
+  [bg2,fg,theremin,play,pause,songButton,videoButton].forEach((e)=>{
+    e.scale = new PIXI.Point(stageScale, stageScale)
   })
-
-  bg.position.set(0, 0);
+  
+  bg.scale = new PIXI.Point(stageScale*1.05, stageScale*1.05)
+  bg.position.set((WIDTH-bg.width)/2, (HEIGHT-bg.height)/2);
   bg2.position.set(WIDTH,0);
   fg.position.set(0, 0);
+  theremin.position.set(0,0);
   play.position.set(WIDTH*.4, HEIGHT*.3);
   playLight.position.x = play.width/2
   playLight.position.y = play.height/2
-  pause.position.set(WIDTH*.03,HEIGHT*.81);
-  songButton.position.set(WIDTH*.9,HEIGHT*.81);
-  videoButton.position.set(WIDTH*.9,HEIGHT*.05);
+  pause.position.set(WIDTH*.015,HEIGHT*.74);
+  songButton.position.set(WIDTH*.02,HEIGHT*.025);
+  videoButton.position.set(WIDTH*.925,HEIGHT*.75);
   
-  [bg,play].forEach(e=>{
+  
+  // knob1.position.set(WIDTH*.384,HEIGHT*.792);
+  // knob2.position.set(WIDTH*.653,HEIGHT*.792);
+  // knob3.position.set(WIDTH*.705,HEIGHT*.792);
+  
+  [knob1,knob2,knob3,knob4].forEach((e)=>{
+    //Center Pivot Point
+    e.anchor.set(0.5,0.5)
+    e.x = e.width / 2;
+    e.y = e.height / 2;
+    e.rotation = -.8 * Math.PI;
+    e.parentGroup = PIXI.lights.diffuseGroup;
+    theremin.addChild(e)
+  });
+  
+  knob1.position.set(theremin.children[0].width*.376,theremin.children[0].height*.8);
+  knob2.position.set(theremin.children[0].width*.642,theremin.children[0].height*.8);
+  knob3.position.set(theremin.children[0].width*.695,theremin.children[0].height*.8);
+  knob4.position.set(theremin.children[0].width*.695,theremin.children[0].height*.8);
+
+  
+  [bg,play].forEach((e)=>{
     e.interactive = true;
-    console.log(e)
   });
   
   [pause,lightR,lightL,lightC,songButton,videoButton].forEach(e=>{
@@ -234,31 +315,58 @@ function onAssetsLoaded(loader, res) {
   cameraLight.position.x = videoButton.position.x + videoButton.width/2
   cameraLight.position.y = videoButton.position.y + videoButton.height/2
 
-  stage.addChild(bg, bg2, fg, play, playLight, pause, songButton, videoButton);
-  stage.addChild(new PIXI.lights.AmbientLight(null, 1));
-  stage.addChild(new PIXI.lights.DirectionalLight(null, 1, fg));
+  stage.addChild(bg, bg2, fg, theremin, play, playLight, pause, songButton, videoButton);
+  stage.addChild(new PIXI.lights.AmbientLight(null, 1.1));
+  stage.addChild(new PIXI.lights.DirectionalLight(null, 1, bg));
   stage.addChild(lightR, lightL, lightC, warmLightContainer, cameraLight);
   
-  document.fonts.load('10pt "B612 Mono"').then(() => {
+  document.fonts.load('10pt "America Mono"').then(() => {
     displayText = new PIXI.Text("", {
-      fontFamily: "B612 Mono",
-      fontSize: WIDTH/30,
+      fontFamily: "America Mono",
+      fontSize: theremin.children[0].width/40,
       fill: 0xff7f00,
-      align: "center"
+      align: "left"
     });
-    displayText.position.set(WIDTH*.51 - displayText.width / 2, HEIGHT * .5);
-    stage.addChild(displayText);
+    displayText.position.set(theremin.children[0].texture.width*.513, theremin.children[0].texture.height * .762);
+    displayText.alpha = .3
     
-    songCred = new PIXI.Text("♪ Alice in 冷凍庫【Orangestar feat. IA】", {
-      fontFamily: "B612 Mono",
+    displayText2 = new PIXI.Text("", {
+      fontFamily: "America Mono",
+      fontSize: theremin.children[0].width/40,
+      fill: 0xff7f00,
+      align: "left"
+    });
+    displayText2.position.set(theremin.children[0].texture.width*.44, theremin.children[0].texture.height * .762);
+    
+    document.fonts.load('10pt "Pose Font"').then(() => {
+      displayText3 = new PIXI.Text("", {
+        fontFamily: "Pose Font",
+        fontSize: theremin.children[0].width/24,
+        fill: 0xff7f00,
+        align: "center",
+        letterSpacing:-3
+      });
+      displayText3.position.set(theremin.children[0].texture.width*.562 - displayText3.width/2, theremin.children[0].texture.height * .792 - displayText3.height/2);
+      theremin.addChild(displayText3);
+    })
+  
+    
+    
+    theremin.addChild(displayText,displayText2);
+    
+    songCred = new PIXI.Text("Alice in 冷凍庫【Orangestar feat. IA】", {
+      fontFamily: "America Mono",
       fontSize: WIDTH/45,
+      fontStyle:"italic",
       fill: 0xffffff,
-      align: "center"
+      align: "left"
     });
     
-    songCred.position.set(WIDTH*.05, HEIGHT*.1 - songCred.height/2);
+    songCred.position.set(WIDTH*.09, HEIGHT*.075 - songCred.height/2);
     songCred.alpha = 0;
     songCred.visible = false;
+    
+    songCred.parentGroup = PIXI.lights.diffuseGroup;
     console.log(songCred)
     stage.addChild(songCred)
   });
@@ -271,7 +379,7 @@ function onAssetsLoaded(loader, res) {
       getWebCam()
       if(this.children[0].texture === res.video.texture){
         this.children[0].texture = res.videoPause.texture
-        cameraLight.brightness = 6
+        cameraLight.brightness = 1
       }else{
         this.children[0].texture = res.video.texture
         cameraLight.brightness = 0
@@ -289,10 +397,13 @@ function onAssetsLoaded(loader, res) {
       if(bgm){
         pattern.start()
         songButton.children[0].texture = res.wholeNote.texture
+        displayText.alpha = 1
       }else{
         pattern.stop()
         songButton.children[0].texture = res.eigthNote.texture
+        displayText.alpha = .3
       }
+      
     }
   })
   
@@ -372,3 +483,7 @@ const lerpColor = function(a, b, amount) {
 
     return (rr << 16) + (rg << 8) + (rb | 0);
 };
+
+document.querySelector('nav .material-icons').addEventListener('pointerdown',(event)=>{
+  document.querySelector('body').classList.toggle('dark')
+})
