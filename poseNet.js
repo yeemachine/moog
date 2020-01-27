@@ -1,7 +1,7 @@
 const video = document.querySelector("video");
 
 const options = {
-  architecture: 'MobileNetV1',
+  architecture: "MobileNetV1",
   imageScaleFactor: 0.3,
   outputStride: 16,
   flipHorizontal: true,
@@ -9,10 +9,10 @@ const options = {
   maxPoseDetections: 1,
   scoreThreshold: 0.5,
   nmsRadius: 20,
-  detectionType: 'single',
+  detectionType: "single",
   inputResolution: 513,
   multiplier: 0.5,
-  quantBytes: 2  
+  quantBytes: 2
 };
 
 // Create a new poseNet method
@@ -42,103 +42,115 @@ function modelLoaded() {
   console.log("Model Loaded!");
   poseNet.on("pose", function(results) {
     //Only Detect 1 person
-      processPoses(results)
-    
+    processPoses(results);
   });
 }
 
-const processPoses = (results) =>{
-      if (results.length > 0 && gameActive) {
-      let scaledPoints = [];
-      let skeletonPoints = [];
-      let rightWrist = results[0].pose.keypoints[10];
-      let leftWrist = results[0].pose.keypoints[9];
-      let nose = results[0].pose.keypoints[0];
-      
-      if(mouseMoved > 100){
-        if(rightWrist.score > .5 && leftWrist.score > .5){
-          //Two Hands
-          rightHand = {
-            x: scale(rightWrist.position.x, video.width, WIDTH) + WIDTH/2,
-            y: scale(rightWrist.position.y, video.height, HEIGHT) + HEIGHT/2,
-          };
+const processPoses = results => {
+  if (results.length > 0 && gameActive) {
+    let scaledPoints = [];
+    let skeletonPoints = [];
+    let rightWrist = results[0].pose.keypoints[10];
+    let leftWrist = results[0].pose.keypoints[9];
+    let nose = results[0].pose.keypoints[0];
 
-          leftHand = {
-            x: scale(leftWrist.position.x, video.width, WIDTH) + WIDTH/2,
-            y: scale(leftWrist.position.y, video.height, HEIGHT) + HEIGHT/2
-          };
+    if (mouseMoved > 100) {
+      if (rightWrist.score > 0.65 && leftWrist.score > 0.65) {
+        //Two Hands
+        rightHand = {
+          x: scale(rightWrist.position.x, video.width, WIDTH) + WIDTH / 2,
+          y: scale(rightWrist.position.y, video.height, HEIGHT) + HEIGHT / 2
+        };
 
-          lightR.position.copy(rightHand);
-          lightL.position.copy(leftHand);
-          lightL.brightness = 3
+        leftHand = {
+          x: scale(leftWrist.position.x, video.width, WIDTH) + WIDTH / 2,
+          y: scale(leftWrist.position.y, video.height, HEIGHT) + HEIGHT / 2
+        };
 
-          updateTextAndAudio(rightHand.x, leftHand.y)
-          
-          let leftText = (leftHand.y > 0 && leftHand.y < .33) ? 'b'
-            :(leftHand.y >= 33 && leftHand.y < .66) ? 'c'
-            :'d';
-          
-          let rightText = (rightHand.y > 0 && rightHand.y < .33) ? '2'
-            :(rightHand.y >= 33 && rightHand.y < .66) ? '3'
-            :'4';
-          
-          displayText3.text = 'c_4'
-          displayText3.alpha = 1
-          
+        lightR.position.copy(rightHand);
+        lightL.position.copy(leftHand);
+        lightL.brightness = 3;
 
-        }else if (rightWrist.score > 0.2 || leftWrist.score > 0.2) {
+        updateTextAndAudio(rightHand.x, leftHand.y);
 
-            //One Hand
-            let domHand = rightWrist.position.y < leftWrist.position.y ? 'left' : 'right';
-            let x = rightWrist.position.y < leftWrist.position.y ? rightWrist.position.x : leftWrist.position.x;
-            let y = rightWrist.position.y < leftWrist.position.y ? rightWrist.position.y : leftWrist.position.y;
+        let leftText =
+          leftHand.y > 0 && leftHand.y < 0.33
+            ? "b"
+            : leftHand.y >= 33 && leftHand.y < 0.66
+            ? "c"
+            : "d";
 
-            rightHand = {
-              x: scale(x, video.width, WIDTH) + WIDTH/2,
-              y: scale(y, video.height, HEIGHT) + HEIGHT/2
-            };
+        let rightText =
+          rightHand.y > 0 && rightHand.y < 0.33
+            ? "2"
+            : rightHand.y >= 33 && rightHand.y < 0.66
+            ? "3"
+            : "4";
 
-            lightR.position.copy(rightHand);
-            lightL.brightness = 0 
+        displayText3.text = "c_4";
+        displayText3.alpha = 1;
+      } else if (rightWrist.score > 0.2 || leftWrist.score > 0.2) {
+        //One Hand
+        let domHand =
+          rightWrist.position.y < leftWrist.position.y ? "left" : "right";
+        let x =
+          rightWrist.position.y < leftWrist.position.y
+            ? rightWrist.position.x
+            : leftWrist.position.x;
+        let y =
+          rightWrist.position.y < leftWrist.position.y
+            ? rightWrist.position.y
+            : leftWrist.position.y;
 
-            updateTextAndAudio(rightHand.x, rightHand.y)
-          
-            let leftText,rightText
-            if(domHand === 'left'){
-              leftText = (rightHand.y > 0 && rightHand.y < .33) ? 'b'
-              :(rightHand.y >= 33 && rightHand.y < .66) ? 'c'
-              :'d';
-              rightText = '1'
-            }else{
-              leftText = 'a'
-              rightText = (rightHand.y > 0 && rightHand.y < .33) ? '2'
-              :(rightHand.y >= 33 && rightHand.y < .66) ? '3'
-              :'4';
-            }
+        rightHand = {
+          x: scale(x, video.width, WIDTH) + WIDTH / 2,
+          y: scale(y, video.height, HEIGHT) + HEIGHT / 2
+        };
 
-            displayText3.text = 'a_4'
-            displayText3.alpha = 1
-           
-        }else{
-          lightL.brightness = 0
-          displayText3.text = 'a_1'
+        lightR.position.copy(rightHand);
+        lightL.brightness = 0;
+
+        updateTextAndAudio(rightHand.x, rightHand.y);
+
+        let leftText, rightText;
+        if (domHand === "left") {
+          leftText =
+            rightHand.y > 0 && rightHand.y < 0.33
+              ? "b"
+              : rightHand.y >= 33 && rightHand.y < 0.66
+              ? "c"
+              : "d";
+          rightText = "1";
+        } else {
+          leftText = "a";
+          rightText =
+            rightHand.y > 0 && rightHand.y < 0.33
+              ? "2"
+              : rightHand.y >= 33 && rightHand.y < 0.66
+              ? "3"
+              : "4";
         }
+
+        displayText3.text = "a_4";
+        displayText3.alpha = 1;
+      } else {
+        lightL.brightness = 0;
+        displayText3.text = "a_1";
       }
-      
-      
-      
-      if (nose.score > 0.2 ){
-        lightC.position.copy({
-          x:scale(nose.position.x, video.width, WIDTH) + WIDTH/2,
-          y:scale(nose.position.y, video.height, HEIGHT) + HEIGHT/2
-        });
-        lightC.brightness = 3
-      }else{
-        lightC.brightness = 0
-      }
-    } else {
     }
-}
+
+    if (nose.score > 0.2) {
+      lightC.position.copy({
+        x: scale(nose.position.x, video.width, WIDTH) + WIDTH / 2,
+        y: scale(nose.position.y, video.height, HEIGHT) + HEIGHT / 2
+      });
+      lightC.brightness = 3;
+    } else {
+      lightC.brightness = 0;
+    }
+  } else {
+  }
+};
 
 const scale = (num, in_min, in_max) => {
   return ((num - in_min / 2) * in_max) / in_min;
